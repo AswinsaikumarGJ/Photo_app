@@ -14,20 +14,16 @@ class HomePageProvider extends ChangeNotifier {
   int page = 1;
   bool apicheck = false;
   bool snackBar = false;
-  bool loading = false;
   ScrollController scrollController = ScrollController();
   final FocusNode heightFocus = FocusNode();
   final FocusNode weightFocus = FocusNode();
   getApiData() async {
     var url = Uri.parse(
         "https://api.unsplash.com/photos?page=$page&client_id=ld4gOXuuc3yuiVI_b8E1lXqNKy3VolKpnJvgEccKm9c");
-    print(url);
     final res = await http.get(url);
     if (res.statusCode == 200) {
       urlData = await jsonDecode(res.body);
-      print(urlData);
       final List newItems = List.from(urlData);
-      // newItems += newItems;
       items.addAll(newItems);
       page++;
       notifyListeners();
@@ -36,18 +32,14 @@ class HomePageProvider extends ChangeNotifier {
 
   void searchApiData(query) async {
     items = [];
-    print(query.text);
-    print("hhh");
     apicheck = true;
     if (query.text != "") {
       var url = Uri.parse(
           "https://api.unsplash.com/search/photos/?page=$page&client_id=ld4gOXuuc3yuiVI_b8E1lXqNKy3VolKpnJvgEccKm9c&query=${query.text}");
-      print(url);
       final res = await http.get(url);
       if (res.statusCode == 200) {
         var urlData1 = jsonDecode(res.body);
         urlData = urlData1["results"];
-        print(urlData);
         final List newItems = List.from(urlData);
         items.addAll(newItems);
         page++;
@@ -83,8 +75,7 @@ class HomePageProvider extends ChangeNotifier {
         ],
       );
     } catch (e) {
-      print("ggg");
-      print(e);
+      print("error");
     }
 
     Directory appDir = await getApplicationDocumentsDirectory();
@@ -95,24 +86,19 @@ class HomePageProvider extends ChangeNotifier {
     try {
       final bytes = await croppedFile!.readAsBytes();
       await savedImage.writeAsBytes(bytes);
-      print("saved image successfully: ${savedImage.path}");
       await savetogallery(savedImage.path);
     } catch (e) {
       print(e);
     }
-    var finalurl = url;
-    print(finalurl);
   }
 
   Future<void> savetogallery(String path) async {
     Directory appDir = await getApplicationDocumentsDirectory();
     String dirPath = appDir.path;
     try {
-      loading = false;
       await GallerySaver.saveImage(path).whenComplete(() {
         snackBar = true;
         notifyListeners();
-        print("snackbar after download : $snackBar");
       });
     } catch (e) {
       print(e);
